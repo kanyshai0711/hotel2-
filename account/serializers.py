@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from .models import User 
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model, authenticate
 from .utils import send_activation_code
+
+User = get_user_model()
+
 
 class RegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
@@ -56,13 +58,13 @@ class ActivationSerializer(serializers.Serializer):
         user.save()
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True)
+    email = serializers.CharField()
+    password = serializers.CharField()
 
     def validate_email(self, email):
-        if User.objects.filter(email=email).exists():
+        if not User.objects.filter(email=email).exists():
             raise serializers.ValidationError(
-              "Пользователь с таким email уже существует"   
+                'Пользователь с таким email не найден'
             )
         return email
     
@@ -71,11 +73,17 @@ class LoginSerializer(serializers.Serializer):
         email = data.get('email')
         password = data.get('password')
         if email and password:
-            user = authenticate(email=email,password=password,request=request)
+            user = authenticate(
+                username=email, 
+                password=password, request=request)
             if not user:
-                raise serializers.ValidationError('Email или пароль не верный!')
+                raise serializers.ValidationError(
+                    'Не верный email или пароль'
+                )
         else:
-            raise serializers.ValidationError('Обязательны к заполнению email и пароль!')
+            raise serializers.ValidationError(
+                'Email и пароль обязательны к заполнению'
+            )
         data['user'] = user
         return data
     

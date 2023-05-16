@@ -19,19 +19,19 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_active', True)
         return self._create(email, password, **extra_fields)
-
     
+
 class User(AbstractBaseUser):
     email = models.EmailField(primary_key=True)
-    name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=40)
+    name = models.CharField(max_length=20, blank=True)
+    last_name = models.CharField(max_length=40, blank=True)
     is_active = models.BooleanField(default = False)
     is_staff = models.BooleanField(default=False)
     activation_code = models.CharField(max_length=20, blank=True)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['name']
 
     def __str__(self) -> str:
